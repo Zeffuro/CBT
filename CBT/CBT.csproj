@@ -3,14 +3,14 @@
   <PropertyGroup>
     <Authors>cultbaus</Authors>
     <Company>-</Company>
-    <Version>0.0.3.2</Version>
+    <Version>0.0.3.3</Version>
     <Description>This plugin manipulates flytext.</Description>
     <Copyright>-</Copyright>
     <PackageProjectUrl>https://github.com/cultbaus/CBT</PackageProjectUrl>
   </PropertyGroup>
 
   <PropertyGroup>
-    <TargetFramework>net8.0-windows</TargetFramework>
+    <TargetFramework>net9.0-windows</TargetFramework>
     <Platforms>x64</Platforms>
     <Nullable>enable</Nullable>
     <LangVersion>latest</LangVersion>
@@ -44,9 +44,12 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="DalamudPackager" Version="2.1.13" />
-    <PackageReference Include="ILRepack" Version="2.1.0-beta1" GeneratePathProperty="true" />
-    <PackageReference Include="StyleCop.Analyzers" Version="1.2.0-beta.435">
+    <PackageReference Include="DalamudPackager" Version="12.0.0" />
+    <PackageReference Include="ILRepack" Version="2.0.43" GeneratePathProperty="true">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+    <PackageReference Include="StyleCop.Analyzers" Version="1.2.0-beta.556">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
