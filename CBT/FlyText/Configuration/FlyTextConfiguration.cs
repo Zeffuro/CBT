@@ -1,5 +1,6 @@
 namespace CBT.FlyText.Configuration;
 
+using System.Numerics;
 using CBT.Types;
 
 /// <summary>
@@ -14,6 +15,7 @@ public class FlyTextConfiguration
     {
         this.Enabled = true;
         this.Positionals = true;
+        this.Offset = Vector2.Zero;
         this.Font = new FlyTextFontConfiguration();
         this.Animation = new FlyTextAnimationConfiguration();
         this.Icon = new FlyTextIconConfiguration();
@@ -31,6 +33,7 @@ public class FlyTextConfiguration
 
         this.Enabled = config.Enabled;
         this.Positionals = config.Positionals;
+        this.Offset = config.Offset;
         this.Font = new FlyTextFontConfiguration(config.Font);
         this.Animation = new FlyTextAnimationConfiguration(config.Animation);
         this.Icon = new FlyTextIconConfiguration(config.Icon);
@@ -46,6 +49,7 @@ public class FlyTextConfiguration
     {
         this.Enabled = toCopy.Enabled;
         this.Positionals = toCopy.Positionals;
+        this.Offset = toCopy.Offset;
         this.Font = new FlyTextFontConfiguration(toCopy.Font);
         this.Animation = new FlyTextAnimationConfiguration(toCopy.Animation);
         this.Icon = new FlyTextIconConfiguration(toCopy.Icon);
@@ -62,6 +66,11 @@ public class FlyTextConfiguration
     /// Gets or sets a value indicating whether or positional data is enabled.
     /// </summary>
     public bool Positionals { get; set; }
+
+    /// <summary>
+    /// Gets or sets the persistent offset from the configuration value.
+    /// </summary>
+    public Vector2 Offset { get; set; }
 
     /// <summary>
     /// Gets or sets the font configuration.

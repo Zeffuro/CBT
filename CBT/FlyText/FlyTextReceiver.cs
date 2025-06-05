@@ -5,7 +5,6 @@ using System.Linq;
 using System.Numerics;
 using CBT.Attributes;
 using CBT.FlyText.Configuration;
-using CBT.Interface.Tabs;
 using CBT.Types;
 using Dalamud.Game.Text.SeStringHandling;
 using Dalamud.Hooking;
@@ -20,6 +19,7 @@ using DalamudFlyText = Dalamud.Game.Gui.FlyText;
 /// </summary>
 public unsafe partial class FlyTextReceiver : IDisposable
 {
+    private readonly Hook<AddScreenLogWithKindDelegate> addScreenLogWithKindHook;
     private readonly Hook<AddScreenLogDelegate> addScreenLogHook;
     private readonly Hook<ReceiveActionEffectDelegate> receiveActionEffectHook;
 
@@ -31,14 +31,17 @@ public unsafe partial class FlyTextReceiver : IDisposable
     {
         Service.FlyTextGui.FlyTextCreated += this.FlyTextCreated;
 
+        this.addScreenLogWithKindHook = gameInteropProvider.HookFromAddress<AddScreenLogWithKindDelegate>(Service.Address.AddScreenLogWithKind, this.AddScreenLogWithKindDetour);
+        this.addScreenLogWithKindHook.Enable();
+
         this.addScreenLogHook = gameInteropProvider.HookFromAddress<AddScreenLogDelegate>(Service.Address.AddScreenLog, this.AddScreenLogDetour);
-        this.addScreenLogHook.Enable();
+        // this.addScreenLogHook.Enable();
 
         this.receiveActionEffectHook = gameInteropProvider.HookFromAddress<ReceiveActionEffectDelegate>(Service.Address.ReceiveActionEffect, this.ReceiveActionEffectDetour);
-        this.receiveActionEffectHook.Enable();
+        // this.receiveActionEffectHook.Enable();
     }
 
-    private delegate void AddScreenLogDelegate(
+    private delegate void AddScreenLogWithKindDelegate(
         Character* target,
         Character* source,
         FlyTextKind kind,
@@ -49,6 +52,8 @@ public unsafe partial class FlyTextReceiver : IDisposable
         int val2,
         int val3,
         int val4);
+
+    private delegate void AddScreenLogDelegate(long screenLogManager, FlyTextCreation* flyTextCreation);
 
     private delegate void ReceiveActionEffectDelegate(
         uint casterEntityId,
@@ -61,10 +66,13 @@ public unsafe partial class FlyTextReceiver : IDisposable
     /// <inheritdoc/>
     public void Dispose()
     {
-        this.addScreenLogHook.Disable();
+        this.addScreenLogWithKindHook.Disable();
+        this.addScreenLogWithKindHook.Dispose();
+
+        // this.addScreenLogHook.Disable();
         this.addScreenLogHook.Dispose();
 
-        this.receiveActionEffectHook.Disable();
+        // this.receiveActionEffectHook.Disable();
         this.receiveActionEffectHook.Dispose();
 
         Service.FlyTextGui.FlyTextCreated -= this.FlyTextCreated;
@@ -72,7 +80,7 @@ public unsafe partial class FlyTextReceiver : IDisposable
         GC.SuppressFinalize(this);
     }
 
-    private void AddScreenLogDetour(
+    private void AddScreenLogWithKindDetour(
         Character* target,
         Character* source,
         FlyTextKind kind,
@@ -87,11 +95,10 @@ public unsafe partial class FlyTextReceiver : IDisposable
         try
         {
             var kindConfig = PluginManager.GetConfigForKind(kind);
-
             var effects = GetEffects(target->GetActionEffectHandler());
             var sourceObjectID = GetGameObjectId(target->GetActionEffectHandler());
 
-            if (ShouldManageEvent(kind, source, target, sourceObjectID.ObjectId, kindConfig) && (kindConfig?.Enabled ?? false))
+            if (ShouldManageEvent(kind, source, target, sourceObjectID.ObjectId, kindConfig))
             {
                 var flyTextEvent = Service.Pool.Get();
                 flyTextEvent.Hydrate(kind, effects, sourceObjectID.ObjectId, target, source, option, actionKind, actionID, val1, val2, val3, val4);
@@ -104,7 +111,12 @@ public unsafe partial class FlyTextReceiver : IDisposable
             Service.PluginLog.Error($"CBT Wizard used Testicular Torsion: {ex.Message}");
         }
 
-        this.addScreenLogHook.Original(target, source, kind, option, actionKind, actionID, val1, val2, val3, val4);
+        this.addScreenLogWithKindHook.Original(target, source, kind, option, actionKind, actionID, val1, val2, val3, val4);
+    }
+
+    private void AddScreenLogDetour(long screenLogManager, FlyTextCreation* flyTextCreation)
+    {
+        this.addScreenLogHook.Original(screenLogManager, flyTextCreation);
     }
 
     private void ReceiveActionEffectDetour(
@@ -146,6 +158,11 @@ public unsafe partial class FlyTextReceiver : IDisposable
             else
             {
                 handled = true;
+            }
+
+            if (!handled)
+            {
+                Service.PluginLog.Info($"FlyTextKind: {kind} was not handled by CBT.");
             }
         }
     }
@@ -190,7 +207,7 @@ public unsafe partial class FlyTextReceiver
     /// <param name="sourceObjectID">Caster of the event.</param>
     /// <param name="kindConfig">Configuration for the current kind.</param>
     /// <returns>A bool indicating whether the plugin should manage the flytext event.</returns>
-    private static bool ShouldManageEvent(FlyTextKind kind, Character* source, Character* target, uint sourceObjectID, FlyTextConfiguration kindConfig)
+    private static bool ShouldManageEvent(FlyTextKind kind, Character* source, Character* target, GameObjectId sourceObjectID, FlyTextConfiguration? kindConfig)
     {
         if (kindConfig == null)
         {
@@ -224,7 +241,7 @@ public unsafe partial class FlyTextReceiver
         var specialCaseForHpRegen =
             kind == FlyTextKind.Healing
                 && PluginManager.IsPartyMember(source)
-                && PluginManager.LocalPlayer?.GameObjectId == sourceObjectID;
+                && PluginManager.LocalPlayer?.GameObjectId == sourceObjectID.ObjectId;
 
         var conditionTable = new (bool Condition, FlyTextFilter Filter)[]
         {

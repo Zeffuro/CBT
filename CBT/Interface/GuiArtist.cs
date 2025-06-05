@@ -319,6 +319,31 @@ public class GuiArtist
     }
 
     /// <summary>
+    /// Draw an input int picker.
+    /// </summary>
+    /// <param name="label">Label for the componenet.</param>
+    /// <param name="sameLine">Should appear on the same line.</param>
+    /// <param name="value">Value to set.</param>
+    /// <param name="min">Min value.</param>
+    /// <param name="max">Max value.</param>
+    /// <param name="onChange">What to do when input changes.</param>
+    public static void DrawInputFloat(string label, bool sameLine, float value, float min, float max, Action<float> onChange)
+    {
+        if (sameLine)
+        {
+            ImGui.SameLine();
+        }
+
+        ImGui.SetNextItemWidth(ShortElementWidth * 2);
+
+        if (ImGui.InputFloat($"##{label}", ref value, step: 1, step_fast: 2))
+        {
+            // value = Math.Clamp(value, min, max);
+            onChange(value);
+        }
+    }
+
+    /// <summary>
     /// Draw an input string picker.
     /// </summary>
     /// <param name="label">Label for the component.</param>

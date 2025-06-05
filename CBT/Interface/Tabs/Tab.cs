@@ -2,10 +2,13 @@ namespace CBT.Interface.Tabs;
 
 using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.Numerics;
 using CBT.Attributes;
 using CBT.FlyText.Configuration;
 using CBT.Types;
+using Dalamud.Interface.Utility;
+using ImGuiNET;
 
 /// <summary>
 /// Tab class.
@@ -130,6 +133,24 @@ public abstract class Tab
     {
         get => this.GetValue(config => config.Icon.Size.X);
         set => this.SetValue((config, val) => config.Icon.Size = new Vector2(val, val), value);
+    }
+
+    /// <summary>
+    /// Gets or sets a value indicating whether.
+    /// </summary>
+    protected float CurrentOffsetX
+    {
+        get => this.GetValue(config => config.Offset.X);
+        set => this.SetValue((config, val) => config.Offset = new Vector2(value, config.Offset.Y), value);
+    }
+
+    /// <summary>
+    /// Gets or sets a value indicating whether.
+    /// </summary>
+    protected float CurrentOffsetY
+    {
+        get => this.GetValue(config => config.Offset.Y);
+        set => this.SetValue((config, val) => config.Offset = new Vector2(config.Offset.X, value), value);
     }
 
     /// <summary>
@@ -346,10 +367,18 @@ public abstract class Tab
     /// </summary>
     protected void DrawAnimationConfigurations()
     {
+        var size = ImGuiHelpers.MainViewport.Size;
+
         GuiArtist.DrawSubTitle("Animation Configuration");
         {
             GuiArtist.DrawLabelPrefix("Reverse Animation", sameLine: false);
             GuiArtist.Checkbox($"Reverse Animation_{this.Name}", sameLine: true, this.CurrentAnimationReversed, enabled => { this.CurrentAnimationReversed = enabled; });
+
+            GuiArtist.DrawLabelPrefix("X Offset", sameLine: false);
+            GuiArtist.DrawInputFloat($"X Offset_{this.Name}", sameLine: true, this.CurrentOffsetX, 0, size.X, size => { this.CurrentOffsetX = size; });
+
+            GuiArtist.DrawLabelPrefix("Y Offset", sameLine: false);
+            GuiArtist.DrawInputFloat($"Y Offset_{this.Name}", sameLine: true, this.CurrentOffsetY, 0, size.Y, size => { this.CurrentOffsetY = size; });
         }
     }
 

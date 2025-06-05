@@ -45,7 +45,7 @@ public class Service
     /// <summary>
     /// Gets or sets the CBT Ability manager.
     /// </summary>
-    public static AbilityManager Ability { get; set; } = null!;
+    public static SheetManager Sheet { get; set; } = null!;
 
     /// <summary>
     /// Gets or sets the CBT QuadTree manager.
