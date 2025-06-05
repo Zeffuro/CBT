@@ -1,8 +1,10 @@
+using Lumina.Excel.Sheets;
+using Lumina.Text.ReadOnly;
+
 namespace CBT.Helpers;
 
 using System.Collections.Generic;
 using Lumina.Excel;
-using Lumina.Excel.GeneratedSheets;
 using S = System;
 
 /// <summary>
@@ -38,7 +40,7 @@ public unsafe class AbilityManager : S.IDisposable
     /// </summary>
     /// <param name="actionID">Action ID.</param>
     /// <returns>Ability name.</returns>
-    public string GetNameForAction(int actionID)
+    public ReadOnlySeString GetNameForAction(int actionID)
          => this.actionCache.TryGetValue(actionID, out var action) ? action?.Name ?? string.Empty : this.GetActionRow(actionID)?.Name ?? string.Empty;
 
     /// <summary>
@@ -46,16 +48,20 @@ public unsafe class AbilityManager : S.IDisposable
     /// </summary>
     /// <param name="value1">Action ID.</param>
     /// <returns>Icon ID.</returns>
-    public ushort GetIconForStatus(int value1)
-         => this.actionCache.TryGetValue(value1, out var status) ? status?.Icon ?? 0 : (ushort)(this.GetStatusRow(value1)?.Icon ?? 0);
+    public uint GetIconForStatus(int value1)
+    {
+        return this.statusCache.TryGetValue(value1, out var status)
+            ? status?.Icon ?? 0
+            : (this.GetStatusRow(value1)?.Icon ?? 0);
+    }
 
     /// <summary>
     /// Get the Ability Name for the given actionID.
     /// </summary>
     /// <param name="value1">Action ID.</param>
     /// <returns>Ability name.</returns>
-    public string GetNameForStatus(int value1)
-         => this.actionCache.TryGetValue(value1, out var status) ? status?.Name ?? string.Empty : this.GetStatusRow(value1)?.Name ?? string.Empty;
+    public ReadOnlySeString GetNameForStatus(int value1)
+         => this.statusCache.TryGetValue(value1, out var status) ? status?.Name ?? string.Empty : this.GetStatusRow(value1)?.Name ?? string.Empty;
 
     private Action? GetActionRow(int actionID)
     {

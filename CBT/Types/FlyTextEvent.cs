@@ -1,3 +1,5 @@
+using Lumina.Text.ReadOnly;
+
 namespace CBT.Types;
 
 using System;
@@ -144,18 +146,17 @@ public unsafe partial class FlyTextEvent
     /// Gets the string representation of the FlyTextEvent Value1.
     /// </summary>
     public string Text
-        => this.Kind.IsStatus() ? this.Format(this.Name) : this.Kind.IsMessage() ? this.Format(this.Kind.Pretty()) : this.Format(this.Value1.ToString("N0"));
+        => this.Kind.IsStatus() ? this.Format(this.Name.ExtractText()) : this.Kind.IsMessage() ? this.Format(this.Kind.Pretty()) : this.Format(this.Value1.ToString("N0"));
 
     /// <summary>
     /// Gets the Dalamud Texture Wrap for the ActionID.
     /// </summary>
-    public IDalamudTextureWrap? Icon
-        => Service.TextureProvider.GetFromGameIcon(new GameIconLookup((uint)this.IconID, false, true)).GetWrapOrDefault();
+    public IDalamudTextureWrap? Icon => Service.TextureProvider.GetFromGameIcon(new GameIconLookup(this.IconID)).GetWrapOrDefault();
 
     /// <summary>
     /// Gets the IconID for the provided Action.
     /// </summary>
-    public ushort IconID
+    public uint IconID
         => this.Kind.IsStatus()
             ? Service.Ability.GetIconForStatus(this.Value1)
             : Service.Ability.GetIconForAction(this.ActionID);
@@ -163,7 +164,7 @@ public unsafe partial class FlyTextEvent
     /// <summary>
     /// Gets the Name for the provided Action.
     /// </summary>
-    public string Name
+    public ReadOnlySeString Name
         => this.Kind.IsStatus()
             ? Service.Ability.GetNameForStatus(this.Value1)
             : Service.Ability.GetNameForAction(this.ActionID);
