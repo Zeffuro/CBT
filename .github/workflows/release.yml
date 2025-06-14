@@ -1,0 +1,125 @@
+name: Release Build and Publish
+
+on:
+  release:
+    types: [published]
+
+jobs:
+  release-build:
+    runs-on: windows-2022
+
+    env:
+      DOTNET_SKIP_FIRST_TIME_EXPERIENCE: true
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Set Date Output
+        id: date
+        shell: pwsh
+        run: |
+          echo "date-month=$(Get-Date -Format 'yyyy-MM')" >> $GITHUB_ENV
+          echo "date-time=$(Get-Date -Format 'yyyy-MM-dd_HH-mm')" >> $GITHUB_ENV
+
+      - name: Extract Project Dalamud Version
+        id: project-dalamud-version
+        shell: pwsh
+        run: |
+          [xml]$xml = Get-Content "./CBT/CBT.csproj"
+          $dalamudVersion = $xml.Project.PropertyGroup.DalamudCIDist
+          echo "dalamud-version=$dalamudVersion" >> $GITHUB_ENV
+
+      - name: Set Dalamud Version Normalised URL Env
+        id: dalamud-norm-url
+        shell: pwsh
+        run: |
+          $url = if ('${{ env.dalamud-version }}' -eq 'release') { '' } else { '${{ env.dalamud-version }}' }
+          echo "url=$url" >> $GITHUB_ENV
+
+      - name: Get Dalamud Version JSON
+        id: request-dalamud-version
+        shell: pwsh
+        run: |
+          $DALAMUD_VER_INFO = Invoke-RestMethod -Uri https://goatcorp.github.io/dalamud-distrib/${{ env.url }}/version
+          echo $DALAMUD_VER_INFO
+          $DALAMUD_VER_INFO | ConvertTo-Json | Set-Content dalamud-version.json
+
+      - name: Cache Dependencies
+        id: cache-dependencies
+        uses: actions/cache@v3
+        with:
+          path: |
+            ./dalamud
+            ~/.nuget/packages
+          key: ${{ runner.os }}-${{ hashFiles('**/*.csproj') }}-${{ hashFiles('dalamud-version.json') }}
+
+      - name: Setup Dalamud
+        if: steps.cache-dependencies.outputs.cache-hit != 'true'
+        shell: pwsh
+        run: |
+          mkdir ./dalamud
+          Invoke-WebRequest -Uri https://goatcorp.github.io/dalamud-distrib/${{ env.url }}/latest.zip -OutFile ./dalamud/latest.zip
+          Expand-Archive -Path ./dalamud/latest.zip ./dalamud
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: '9.x'
+
+      - name: Restore project dependencies
+        run: dotnet restore
+
+      - name: Build Release
+        run: dotnet build --no-restore --configuration Release
+
+      - name: Prepare zip file
+        run: |
+          mkdir output
+          Compress-Archive -Path CBT/bin/Release/* -DestinationPath output/latest.zip
+          
+      - name: Upload zip to GitHub release
+        uses: softprops/action-gh-release@v1
+        with:
+          files: output/latest.zip
+
+      - name: Clone plugin hosting repo
+        run: git clone https://github.com/${{ github.repository_owner }}/MyDalamudPlugins.git
+        env:
+          GIT_TERMINAL_PROMPT: 0
+
+      - name: Copy zip to plugins folder
+        run: Copy-Item output/latest.zip -Destination MyDalamudPlugins/plugins/CBT/latest.zip -Force
+
+      - name: Update repo.json with version and timestamp
+        shell: pwsh
+        run: |
+          $pluginJson = Get-Content CBT/CBT.json | ConvertFrom-Json
+          $repoJsonPath = "MyDalamudPlugins/repo.json"
+          $repoJsonRaw = Get-Content $repoJsonPath -Raw
+          $repoJson = $repoJsonRaw | ConvertFrom-Json
+
+          # Ensure array structure
+          if (-not ($repoJson -is [System.Collections.IEnumerable])) {
+            $repoJson = @($repoJson)
+          }
+
+          # Find and update the correct plugin entry
+          foreach ($plugin in $repoJson) {
+            if ($plugin.InternalName -eq $pluginJson.InternalName) {
+              $plugin.AssemblyVersion = $pluginJson.AssemblyVersion
+              $plugin.LastUpdated = [int][double]::Parse((Get-Date -UFormat %s))
+            }
+          }
+
+          # Save the modified array back to the file
+          $repoJson | ConvertTo-Json -Depth 100 | Set-Content $repoJsonPath
+
+      - name: Commit and push to MyDalamudPlugins
+        run: |
+          cd MyDalamudPlugins
+          git config user.name "github-actions"
+          git config user.email "github-actions@github.com"
+          git add .
+          git commit -m "Update CBT to ${{ github.event.release.tag_name }}"
+          git push https://x-access-token:${{ secrets.MYDALAMUDPLUGINS_TOKEN }}@github.com/${{ github.repository_owner }}/MyDalamudPlugins.git HEAD:main
