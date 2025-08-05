@@ -14,6 +14,7 @@ public class FlyTextConfiguration
     public FlyTextConfiguration()
     {
         this.Enabled = true;
+        this.PreviewEnabled = false;
         this.Positionals = true;
         this.Offset = Vector2.Zero;
         this.Font = new FlyTextFontConfiguration();
@@ -32,6 +33,7 @@ public class FlyTextConfiguration
         FlyTextConfiguration config = Service.Configuration.FlyTextKinds[kind];
 
         this.Enabled = config.Enabled;
+        this.PreviewEnabled = config.PreviewEnabled;
         this.Positionals = config.Positionals;
         this.Offset = config.Offset;
         this.Font = new FlyTextFontConfiguration(config.Font);
@@ -48,6 +50,7 @@ public class FlyTextConfiguration
     public FlyTextConfiguration(FlyTextConfiguration toCopy)
     {
         this.Enabled = toCopy.Enabled;
+        this.PreviewEnabled = toCopy.PreviewEnabled;
         this.Positionals = toCopy.Positionals;
         this.Offset = toCopy.Offset;
         this.Font = new FlyTextFontConfiguration(toCopy.Font);
@@ -61,6 +64,11 @@ public class FlyTextConfiguration
     /// Gets or sets a value indicating whether or not the kind is enabled.
     /// </summary>
     public bool Enabled { get; set; }
+    
+    /// <summary>
+    /// Gets or sets a value indicating whether or not the preview is enabled.
+    /// </summary>
+    public bool PreviewEnabled { get; set; }
 
     /// <summary>
     /// Gets or sets a value indicating whether or positional data is enabled.

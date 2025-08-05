@@ -10,7 +10,7 @@ using CBT.Helpers;
 using Dalamud.Interface.Textures;
 using Dalamud.Interface.Textures.TextureWraps;
 using FFXIVClientStructs.FFXIV.Client.Game.Character;
-using ImGuiNET;
+using Dalamud.Bindings.ImGui;
 using Lumina.Text.ReadOnly;
 using static FFXIVClientStructs.FFXIV.Client.Game.Character.ActionEffectHandler;
 

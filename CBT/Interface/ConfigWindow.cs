@@ -6,7 +6,7 @@ using CBT.FlyText.Configuration;
 using CBT.Interface.Tabs;
 using Dalamud.Interface.Utility.Raii;
 using Dalamud.Interface.Windowing;
-using ImGuiNET;
+using Dalamud.Bindings.ImGui;
 
 /// <summary>
 /// ConfigWindow is the primary configuration GUI for CBT.
@@ -88,7 +88,7 @@ public partial class ConfigWindow : Window
                 var imagePadding = (regionSize.X - imageSize.X) / 2;
 
                 ImGui.SetCursorPosX(imagePadding);
-                ImGui.Image(logoImage.ImGuiHandle, imageSize);
+                ImGui.Image(logoImage.Handle, imageSize);
 
                 if (ImGui.IsItemHovered())
                 {

@@ -4,7 +4,7 @@ using System;
 using System.Numerics;
 using Dalamud.Interface.Utility;
 using Dalamud.Interface.Windowing;
-using ImGuiNET;
+using Dalamud.Bindings.ImGui;
 
 /// <summary>
 /// OverlayWindow is the primary canvas for CBT FlyTextEvents.

@@ -8,7 +8,7 @@ using CBT.Attributes;
 using CBT.FlyText.Configuration;
 using CBT.Types;
 using Dalamud.Interface.Utility;
-using ImGuiNET;
+using Dalamud.Bindings.ImGui;
 
 /// <summary>
 /// Tab class.
@@ -61,6 +61,15 @@ public abstract class Tab
     {
         get => this.GetValue(config => config.Filter.Party);
         set => this.SetValue((config, val) => config.Filter.Party = val, value);
+    }
+    
+    /// <summary>
+    /// Gets or sets a value indicating whether preview is enabled.
+    /// </summary>
+    protected bool CurrentPreviewEnabled
+    {
+        get => this.GetValue(config => config.PreviewEnabled);
+        set => this.SetValue((config, val) => config.PreviewEnabled = val, value);
     }
 
     /// <summary>
@@ -291,6 +300,9 @@ public abstract class Tab
                         GuiArtist.DrawLabelPrefix("Enabled On Party", sameLine: false);
                         GuiArtist.Checkbox($"Enabled On Party_{this.Name}", sameLine: true, this.CurrentEnabledForParty, enabled => { this.CurrentEnabledForParty = enabled; });
                     }
+
+                    GuiArtist.DrawLabelPrefix("Preview", sameLine: false);
+                    GuiArtist.Checkbox($"Enabled On Party_{this.Name}", sameLine: true, this.CurrentPreviewEnabled, enabled => { this.CurrentPreviewEnabled = enabled; });
                 }
             }
         }
