@@ -8,7 +8,7 @@ using CBT.FlyText.Configuration;
 using CBT.Interface.Tabs;
 using Dalamud.Interface.Utility;
 using Dalamud.Interface.Utility.Raii;
-using ImGuiNET;
+using Dalamud.Bindings.ImGui;
 
 /// <summary>
 /// Artist is a set of utility methods for drawing ImGui thingies.
@@ -311,9 +311,34 @@ public class GuiArtist
 
         ImGui.SetNextItemWidth(ShortElementWidth * 2);
 
-        if (ImGui.InputInt($"##{label}", ref value, step: 1, step_fast: 2))
+        if (ImGui.InputInt($"##{label}", ref value, step: 1, stepFast: 2))
         {
             value = Math.Clamp(value, min, max);
+            onChange(value);
+        }
+    }
+
+    /// <summary>
+    /// Draw an input int picker.
+    /// </summary>
+    /// <param name="label">Label for the componenet.</param>
+    /// <param name="sameLine">Should appear on the same line.</param>
+    /// <param name="value">Value to set.</param>
+    /// <param name="min">Min value.</param>
+    /// <param name="max">Max value.</param>
+    /// <param name="onChange">What to do when input changes.</param>
+    public static void DrawInputFloat(string label, bool sameLine, float value, float min, float max, Action<float> onChange)
+    {
+        if (sameLine)
+        {
+            ImGui.SameLine();
+        }
+
+        ImGui.SetNextItemWidth(ShortElementWidth * 2);
+
+        if (ImGui.InputFloat($"##{label}", ref value, step: 1, stepFast: 2))
+        {
+            // value = Math.Clamp(value, min, max);
             onChange(value);
         }
     }
@@ -337,7 +362,7 @@ public class GuiArtist
 
         ImGui.SetNextItemWidth(Scale(ShortElementWidth * 3));
 
-        if (ImGui.InputText($"##{label}", buffer, (uint)buffer.Length))
+        if (ImGui.InputText($"##{label}", buffer))
         {
             var input = Encoding.UTF8.GetString(buffer).TrimEnd('\0');
             onChange(input);

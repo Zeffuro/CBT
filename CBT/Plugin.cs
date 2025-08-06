@@ -61,7 +61,7 @@ public sealed partial class Plugin : IDalamudPlugin
         Service.Manager = new PluginManager();
         Service.Manifest = new ManifestManager(assemblyLocation + Path.GetFileNameWithoutExtension(Service.Interface.AssemblyLocation.FullName) + ".json");
         Service.Receiver = new FlyTextReceiver(gameInteropProvider);
-        Service.Ability = new AbilityManager();
+        Service.Sheet = new SheetManager();
         Service.Tree = new QuadTreeManager();
         Service.Pool = new FlyTextPool();
     }
@@ -71,7 +71,7 @@ public sealed partial class Plugin : IDalamudPlugin
     {
         Service.Pool.Dispose();
         Service.Tree.Dispose();
-        Service.Ability.Dispose();
+        Service.Sheet.Dispose();
         Service.Receiver.Dispose();
         Service.Manager.Dispose();
         Service.Manifest.Dispose();

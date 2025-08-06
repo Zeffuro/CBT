@@ -9,7 +9,7 @@ using CBT.FlyText.Configuration;
 using CBT.Interface.Tabs;
 using CBT.Types;
 using Dalamud.Configuration;
-using ImGuiNET;
+using Dalamud.Bindings.ImGui;
 
 /// <summary>
 /// Global options.

@@ -1,7 +1,7 @@
 namespace CBT.Helpers;
-
 using System.Collections.Generic;
 using Newtonsoft.Json;
+
 
 public record Manifest
 {

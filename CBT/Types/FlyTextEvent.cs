@@ -1,5 +1,3 @@
-using Lumina.Text.ReadOnly;
-
 namespace CBT.Types;
 
 using System;
@@ -12,7 +10,8 @@ using CBT.Helpers;
 using Dalamud.Interface.Textures;
 using Dalamud.Interface.Textures.TextureWraps;
 using FFXIVClientStructs.FFXIV.Client.Game.Character;
-using ImGuiNET;
+using Dalamud.Bindings.ImGui;
+using Lumina.Text.ReadOnly;
 using static FFXIVClientStructs.FFXIV.Client.Game.Character.ActionEffectHandler;
 
 /// <summary>
@@ -21,6 +20,8 @@ using static FFXIVClientStructs.FFXIV.Client.Game.Character.ActionEffectHandler;
 public unsafe partial class FlyTextEvent
 {
     private Vector2? flyTextSize;
+    private string? formattedText;
+    private Vector2? configuredOffset;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="FlyTextEvent"/> class.
@@ -102,10 +103,33 @@ public unsafe partial class FlyTextEvent
     }
 
     /// <summary>
+    /// Gets offset from the configuration.
+    /// </summary>
+    public Vector2 Offset
+    {
+        get
+        {
+            if (this.configuredOffset == null)
+            {
+                if (Service.Configuration.FlyTextKinds.TryGetValue(this.Kind, out var kindConfig))
+                {
+                    this.configuredOffset = kindConfig.Offset;
+                }
+                else
+                {
+                    this.configuredOffset = Vector2.Zero;
+                }
+            }
+
+            return (Vector2)this.configuredOffset;
+        }
+    }
+
+    /// <summary>
     /// Gets the position of the FlyTextEvent with the animation offset applied.
     /// </summary>
     public Vector2 Position
-        => this.Anchor + this.Animation.Offset;
+        => this.Anchor + this.Offset + this.Animation.Offset;
 
     /// <summary>
     /// Gets the size of the FlyTextEvent rectangle.
@@ -146,7 +170,14 @@ public unsafe partial class FlyTextEvent
     /// Gets the string representation of the FlyTextEvent Value1.
     /// </summary>
     public string Text
-        => this.Kind.IsStatus() ? this.Format(this.Name.ExtractText()) : this.Kind.IsMessage() ? this.Format(this.Kind.Pretty()) : this.Format(this.Value1.ToString("N0"));
+    {
+        get
+        {
+            this.formattedText = this.Kind.IsStatus() ? this.Format(this.Name.ExtractText()) : this.Kind.IsMessage() ? this.Format(this.Kind.Pretty()) : this.Format(this.Value1.ToString("N0"));
+
+            return this.formattedText;
+        }
+    }
 
     /// <summary>
     /// Gets the Dalamud Texture Wrap for the ActionID.
@@ -157,17 +188,43 @@ public unsafe partial class FlyTextEvent
     /// Gets the IconID for the provided Action.
     /// </summary>
     public uint IconID
-        => this.Kind.IsStatus()
-            ? Service.Ability.GetIconForStatus(this.Value1)
-            : Service.Ability.GetIconForAction(this.ActionID);
+    {
+        get
+        {
+            if (this.Kind.IsStatus())
+            {
+                return Service.Sheet.GetIconForStatus(this.Value1);
+            }
+
+            if (this.Kind.IsOther())
+            {
+                return Service.Sheet.GetIconForItem(this.ActionID);
+            }
+
+            return Service.Sheet.GetIconForAction(this.ActionID);
+        }
+    }
 
     /// <summary>
     /// Gets the Name for the provided Action.
     /// </summary>
     public ReadOnlySeString Name
-        => this.Kind.IsStatus()
-            ? Service.Ability.GetNameForStatus(this.Value1)
-            : Service.Ability.GetNameForAction(this.ActionID);
+    {
+        get
+        {
+            if (this.Kind.IsStatus())
+            {
+                return Service.Sheet.GetNameForStatus(this.Value1);
+            }
+
+            if (this.Kind.IsOther())
+            {
+                return Service.Sheet.GetNameForItem(this.ActionID);
+            }
+
+            return Service.Sheet.GetNameForAction(this.ActionID);
+        }
+    }
 
     /// <summary>
     /// Gets the damage type of an action.
@@ -318,6 +375,10 @@ public unsafe partial class FlyTextEvent
 
         this.Config = null!;
         this.Animation = null!;
+
+        this.flyTextSize = default;
+        this.formattedText = default;
+        this.configuredOffset = default;
     }
 
     /// <summary>

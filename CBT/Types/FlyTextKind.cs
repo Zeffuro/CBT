@@ -109,12 +109,26 @@ public enum FlyTextKind
     [FlyTextCategory(FlyTextCategory.Debuff)]
     Debuff = DalamudFlyText.Debuff,
 
-    /*
-    * Exp,
-    * IslandExp,
-    * MpDrain,
-    * NamedTp,
-    */
+    /// <summary>
+    /// Experience.
+    /// </summary>
+    [FlyTextFilter([FlyTextFilter.Party, FlyTextFilter.Enemy])]
+    [FlyTextCategory(FlyTextCategory.Other)]
+    Exp = DalamudFlyText.Exp,
+
+    /// <summary>
+    /// Island Experience.
+    /// </summary>
+    [FlyTextFilter([FlyTextFilter.Party, FlyTextFilter.Enemy])]
+    [FlyTextCategory(FlyTextCategory.Other)]
+    IslandExp = DalamudFlyText.IslandExp,
+
+    /// <summary>
+    /// MpDrain.
+    /// </summary>
+    [FlyTextFilter([FlyTextFilter.Party, FlyTextFilter.Enemy])]
+    [FlyTextCategory(FlyTextCategory.Other)]
+    MpDrain = DalamudFlyText.MpDrain,
 
     /// <summary>
     /// Healing.
@@ -130,12 +144,26 @@ public enum FlyTextKind
     [FlyTextCategory(FlyTextCategory.AbilityHealing)]
     MpRegen = DalamudFlyText.MpRegen,
 
-    /*
-    * NamedTp2,
-    * EpRegen,
-    * CpRegen,
-    * GpRegen,
-    */
+    /// <summary>
+    /// EpRegen.
+    /// </summary>
+    [FlyTextFilter([FlyTextFilter.Enemy, FlyTextFilter.Party])]
+    [FlyTextCategory(FlyTextCategory.Other)]
+    EpRegen = DalamudFlyText.EpRegen,
+
+    /// <summary>
+    /// CpRegen.
+    /// </summary>
+    [FlyTextFilter([FlyTextFilter.Enemy, FlyTextFilter.Party])]
+    [FlyTextCategory(FlyTextCategory.Other)]
+    CpRegen = DalamudFlyText.CpRegen,
+
+    /// <summary>
+    /// GpRegen.
+    /// </summary>
+    [FlyTextFilter([FlyTextFilter.Enemy, FlyTextFilter.Party])]
+    [FlyTextCategory(FlyTextCategory.Other)]
+    GpRegen = DalamudFlyText.GpRegen,
 
     /// <summary>
     /// None.
@@ -151,12 +179,33 @@ public enum FlyTextKind
     [FlyTextCategory(FlyTextCategory.Miss)]
     Invulnerable = DalamudFlyText.Invulnerable,
 
-    /*
-    * Interrupted,
-    * CraftingProgress,
-    * CraftingQuality,
-    * CraftingQualityCrit,
-    */
+    /// <summary>
+    /// Interrupted.
+    /// </summary>
+    [FlyTextFilter([FlyTextFilter.Party])]
+    [FlyTextCategory(FlyTextCategory.Miss)]
+    Interrupted = DalamudFlyText.Interrupted,
+
+    /// <summary>
+    /// Crafting.
+    /// </summary>
+    [FlyTextFilter([FlyTextFilter.Party, FlyTextFilter.Enemy])]
+    [FlyTextCategory(FlyTextCategory.Other)]
+    CraftingProgress = DalamudFlyText.CraftingProgress,
+
+    /// <summary>
+    /// Crafting Quality.
+    /// </summary>
+    [FlyTextFilter([FlyTextFilter.Party, FlyTextFilter.Enemy])]
+    [FlyTextCategory(FlyTextCategory.Other)]
+    CraftingQuality = DalamudFlyText.CraftingQuality,
+
+    /// <summary>
+    /// Crafting Quality Crit.
+    /// </summary>
+    [FlyTextFilter([FlyTextFilter.Party, FlyTextFilter.Enemy])]
+    [FlyTextCategory(FlyTextCategory.Other)]
+    CraftingQualityCrit = DalamudFlyText.CraftingQualityCrit,
 
     /// <summary>
     /// Healing crit.
@@ -297,6 +346,8 @@ public enum FlyTextKind
 /// </summary>
 public static class FlyTextKindExtension
 {
+    private static readonly Dictionary<FlyTextKind, FlyTextCategory> CategoryCache = new Dictionary<FlyTextKind, FlyTextCategory>();
+
     /// <summary>
     /// Gets the category for a given FlyTextKind.
     /// </summary>
@@ -305,13 +356,23 @@ public static class FlyTextKindExtension
     /// <exception cref="ArgumentOutOfRangeException">Throws if the kind has no category.</exception>
     public static FlyTextCategory GetCategory(this FlyTextKind kind)
     {
+        if (CategoryCache.TryGetValue(kind, out var category))
+        {
+            return category;
+        }
+
         var attr = typeof(FlyTextKind)
             .GetMember(kind.ToString())[0]
             .GetCustomAttributes(typeof(FlyTextCategoryAttribute), false);
 
-        return attr.Length > 0
-            ? ((FlyTextCategoryAttribute)attr[0]).Category
-            : throw new ArgumentOutOfRangeException(nameof(kind), kind, null);
+        if (attr.Length > 0)
+        {
+            category = ((FlyTextCategoryAttribute)attr[0]).Category;
+            CategoryCache[kind] = category;
+            return category;
+        }
+
+        throw new ArgumentOutOfRangeException(nameof(kind), kind, null);
     }
 
     /// <summary>
@@ -382,6 +443,14 @@ public static class FlyTextKindExtension
         => kind.InCategory(FlyTextCategory.Buff) || kind.InCategory(FlyTextCategory.Debuff);
 
     /// <summary>
+    /// Check if this kind is other.
+    /// </summary>
+    /// <param name="kind">FlyTextKind.</param>
+    /// <returns>Bool if this is an "other" kind.</returns>
+    public static bool IsOther(this FlyTextKind kind)
+        => kind.InCategory(FlyTextCategory.Other);
+
+    /// <summary>
     /// Checks if a kind is a message-only.
     /// </summary>
     /// <param name="kind">FlyTextKind.</param>
@@ -395,7 +464,7 @@ public static class FlyTextKindExtension
     /// <param name="kind">FlyTextKind.</param>
     /// <returns>Bool indicating if the kind is a spell/ability.</returns>
     public static bool IsSpell(this FlyTextKind kind)
-        => !IsStatus(kind);
+        => !IsStatus(kind) && !IsOther(kind);
 
     /// <summary>
     /// Gets all kinds.

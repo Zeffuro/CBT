@@ -8,7 +8,7 @@ using CBT.Helpers;
 using CBT.Types;
 using Dalamud.Interface.Utility.Raii;
 using FFXIVClientStructs;
-using ImGuiNET;
+using Dalamud.Bindings.ImGui;
 
 /// <summary>
 /// FlyTextArtist draws FlyText to the main CBT Canvas.
@@ -127,7 +127,7 @@ public unsafe class FlyTextArtist
 
         var (uvMin, uvMax) = CalculateUvMinMax(iconConfig.Zoom);
 
-        drawList.AddImage(flyTextEvent.Icon?.ImGuiHandle ?? 0, iconPos, iconPos + iconSize, uvMin, uvMax, iconAlpha);
+        drawList.AddImage(flyTextEvent.Icon?.Handle ?? 0, iconPos, iconPos + iconSize, uvMin, uvMax, iconAlpha);
     }
 
     private static void DrawIconOutline(ImDrawListPtr drawList, ref FlyTextEvent flyTextEvent, ref Vector2 iconPos, ref Vector2 iconSize)

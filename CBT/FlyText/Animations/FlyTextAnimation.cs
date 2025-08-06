@@ -4,6 +4,7 @@ using System;
 using System.Numerics;
 
 using CBT.Types;
+using FFXIVClientStructs;
 
 /// <summary>
 /// FlyTextAnimationKind enumerates the kinds of animations for <see cref="FlyTextEvent"/>s.
@@ -108,7 +109,7 @@ public abstract class FlyTextAnimation
     /// <returns>The new position after adjusting.</returns>
     public static Vector2 Center(FlyTextEvent flyTextEvent)
     {
-        return new(flyTextEvent.Position.X - (flyTextEvent.Size.X / 2), flyTextEvent.Position.Y - (flyTextEvent.Size.Y / 2));
+        return new Vector2(flyTextEvent.Position.X - (flyTextEvent.Size.X / 2), flyTextEvent.Position.Y - (flyTextEvent.Size.Y / 2));
     }
 
     /// <summary>

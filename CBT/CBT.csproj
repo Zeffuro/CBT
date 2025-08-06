@@ -1,9 +1,9 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <Authors>cultbaus</Authors>
     <Company>-</Company>
-    <Version>0.0.3.3</Version>
+    <Version>0.0.3.5</Version>
     <Description>This plugin manipulates flytext.</Description>
     <Copyright>-</Copyright>
     <PackageProjectUrl>https://github.com/cultbaus/CBT</PackageProjectUrl>
@@ -49,8 +49,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="DalamudPackager" Version="12.0.0" />
-    <PackageReference Include="ILRepack" Version="2.0.43" GeneratePathProperty="true">
+    <PackageReference Include="DalamudPackager" Version="13.0.0" />
+    <PackageReference Include="ILRepack" Version="2.0.44" GeneratePathProperty="true">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
