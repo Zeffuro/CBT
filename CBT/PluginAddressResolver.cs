@@ -28,7 +28,7 @@ public class PluginAddressResolver : BaseAddressResolver
     {
         this.AddScreenLogWithKind = scanner.ScanText("E8 ?? ?? ?? ?? BF ?? ?? ?? ?? EB 39");
         this.AddScreenLog = scanner.ScanText("E8 ?? ?? ?? ?? 45 85 E4 0F 84 ?? ?? ?? ?? 48 8B 0D");
-        this.ReceiveActionEffect = scanner.ScanText("40 55 53 56 41 54 41 55 41 56 41 57 48 8D AC 24 ?? ?? ?? ?? 48 81 EC ?? ?? ?? ?? 48 8B 05 ?? ?? ?? ?? 48 33 C4 48 89 45 70");
+        this.ReceiveActionEffect = scanner.ScanText("40 55 56 57 41 54 41 55 41 56 41 57 48 8D AC 24");
 
         Service.PluginLog.Debug($"{nameof(this.AddScreenLogWithKind)}   0x{this.AddScreenLogWithKind:X}");
         Service.PluginLog.Debug($"{nameof(this.AddScreenLog)}           0x{this.AddScreenLog:X}");
