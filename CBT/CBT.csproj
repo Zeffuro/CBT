@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <Authors>cultbaus</Authors>
@@ -26,13 +26,18 @@
     <DocumentationFile></DocumentationFile>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
   </PropertyGroup>
+
   <PropertyGroup>
-    <DalamudLibPath>$(appdata)\XIVLauncher\addon\Hooks\dev\</DalamudLibPath>
+    <DalamudCIDist>release</DalamudCIDist>
+    <DalamudVersion>dev</DalamudVersion>
+    <DalamudLocal>../dalamud/</DalamudLocal>
+    <DalamudLibPath>$(APPDATA)\XIVLauncher\addon\Hooks\$(DalamudVersion)\</DalamudLibPath>
   </PropertyGroup>
 
   <PropertyGroup>
     <AssemblySearchPaths>
       $(AssemblySearchPaths);
+      $(DalamudLocal);
       $(DalamudLibPath);
     </AssemblySearchPaths>
   </PropertyGroup>
@@ -53,17 +58,34 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-    <Reference Include="Dalamud" Private="False" />
-    <Reference Include="FFXIVClientStructs" Private="False" />
-    <Reference Include="Dalamud.Bindings.ImGui" Private="False" />
-    <Reference Include="Dalamud.Bindings.ImPlot" Private="False" />
-    <Reference Include="Newtonsoft.Json" Private="False" />
-    <Reference Include="Lumina" Private="False" />
-    <Reference Include="Lumina.Excel" Private="False" />
-	  <Reference Include="InteropGenerator.Runtime">
-		  <HintPath>$(DalamudLibPath)InteropGenerator.Runtime.dll</HintPath>
-		  <Private>false</Private>
-	  </Reference>
+    <Reference Include="Dalamud">
+      <HintPath>$(DalamudLibPath)Dalamud.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="FFXIVClientStructs">
+      <HintPath>$(DalamudLibPath)FFXIVClientStructs.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="ImGui.NET">
+      <HintPath>$(DalamudLibPath)ImGui.NET.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="Newtonsoft.Json">
+      <HintPath>$(DalamudLibPath)Newtonsoft.Json.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="Lumina">
+      <HintPath>$(DalamudLibPath)Lumina.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="Lumina.Excel">
+      <HintPath>$(DalamudLibPath)Lumina.Excel.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="InteropGenerator.Runtime">
+      <HintPath>$(DalamudLibPath)InteropGenerator.Runtime.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
   </ItemGroup>
 
   <Target Name="ILRepack" AfterTargets="Build">
@@ -71,7 +93,7 @@
       <InputAssemblies Include="$(TargetPath)" />
       <InputAssemblies Include="$(TargetDir)*.dll" Exclude="$(TargetPath)" />
     </ItemGroup>
-    <Exec Command="$(PkgILRepack)\tools\ILRepack.exe /lib:$(DalamudLibPath) /out:$(TargetDir)$(TargetFileName) @(InputAssemblies, ' ')" />
+    <Exec Command="$(PkgILRepack)\tools\ILRepack.exe /lib:$(DalamudLocal) /lib:$(DalamudLibPath) /out:$(TargetDir)$(TargetFileName) @(InputAssemblies, ' ')" />
   </Target>
 
   <Target Name="CleanOutDir" AfterTargets="ILRepack">
