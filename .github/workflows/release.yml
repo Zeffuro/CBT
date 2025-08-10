@@ -68,30 +68,30 @@ jobs:
           GIT_TERMINAL_PROMPT: 0
 
       - name: Copy zip to plugins folder
-        run: Copy-Item output/latest.zip -Destination MyDalamudPlugins/plugins/${{ env.PLUGIN_NAME }}/latest.zip -Force
+        run: |
+          Copy-Item output/latest.zip -Destination MyDalamudPlugins/plugins/${{ env.PLUGIN_NAME }}/latest.zip -Force
+          Copy-Item output/${{ env.PLUGIN_NAME }}.json -Destination MyDalamudPlugins/plugins/${{ env.PLUGIN_NAME }}/${{ env.PLUGIN_NAME }}.zip -Force
 
       - name: Update repo.json with version and timestamp
         shell: pwsh
         run: |
-          $pluginJson = Get-Content ${{ env.PLUGIN_NAME }}/${{ env.PLUGIN_NAME }}.json | ConvertFrom-Json
+          $pluginJsonPath = "${{ env.PLUGIN_NAME }}/bin/Release/${{ env.PLUGIN_NAME }}.json"
+          $pluginJson = Get-Content $pluginJsonPath | ConvertFrom-Json
           $repoJsonPath = "MyDalamudPlugins/repo.json"
           $repoJsonRaw = Get-Content $repoJsonPath -Raw
           $repoJson = $repoJsonRaw | ConvertFrom-Json
-
-          # Ensure array structure
+          
           if (-not ($repoJson -is [System.Collections.IEnumerable])) {
             $repoJson = @($repoJson)
           }
-
-          # Find and update the correct plugin entry
+          
           foreach ($plugin in $repoJson) {
             if ($plugin.InternalName -eq $pluginJson.InternalName) {
               $plugin.AssemblyVersion = $pluginJson.AssemblyVersion
               $plugin.LastUpdated = [int][double]::Parse((Get-Date -UFormat %s))
             }
           }
-
-          # Save the modified array back to the file
+          
           $repoJson | ConvertTo-Json -Depth 100 | Set-Content $repoJsonPath
 
       - name: Commit and push to MyDalamudPlugins
