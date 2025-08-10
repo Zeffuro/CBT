@@ -55,7 +55,7 @@ jobs:
       - name: Prepare zip file
         run: |
           mkdir output
-          Copy-Item ${{ env.PLUGIN_NAME }}/bin/Release/${{ env.PLUGIN_NAME }}/latest.zip -Destination output/latest.zip -Force
+          Compress-Archive -Path ${{ env.PLUGIN_NAME }}/bin/Release/* -DestinationPath output/latest.zip
 
       - name: Upload zip to GitHub release
         uses: softprops/action-gh-release@v1
