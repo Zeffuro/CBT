@@ -6,7 +6,7 @@ on:
 
 jobs:
   build-staging:
-    name: Build against Staging Dalamud
+    name: Release Build against Staging Dalamud and deploy to MyDalamudPlugins
     runs-on: windows-2022
 
     # Define the plugin name and Dalamud version variables for this job
@@ -55,7 +55,7 @@ jobs:
       - name: Prepare zip file
         run: |
           mkdir output
-          Copy-Item ${{ env.PLUGIN_NAME }}/bin/Release/${{ env.PLUGIN_NAME }}/latest.dll -Destination output/latest.dll -Force
+          Copy-Item ${{ env.PLUGIN_NAME }}/bin/Release/${{ env.PLUGIN_NAME }}/latest.zip -Destination output/latest.zip -Force
 
       - name: Upload zip to GitHub release
         uses: softprops/action-gh-release@v1
